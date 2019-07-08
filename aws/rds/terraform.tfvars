@@ -1,17 +1,33 @@
 #aws account
-access_key = "***************"  
-secret_key = "***************"
+access_key = "*********"  
+secret_key = "*********"
 
-vpc_id = "vpc-***********"
-my_ip = "your ip" #eg 98.180.206.139/32
-vpc_ip = "vpc ip"
+vpc_id = "vpc-**********"
 
-rds_sg_name = "rds sg name"
+private_subnets = ["subnet-*********", "subnet-***********"]
 
-rds_instance_identifier = "rds identifier"
-engine_version = "5.6.40"
-database_name = "data base name"
-database_user = "db user"
-database_pwd = "db password"
-db_subnet_group_name = "db subnet group"
-db_availability_zone = "us-east-1a"
+region = "us-east-1"
+
+rds_sg_name = "ranger-rds-sg"
+rds_sg_desc = "Ranger RDS SG"
+
+#RDS properties
+#any db instance identifier name
+db_instance_identifier = "ranger-rds"
+db_engine = "mysql"
+db_engine_version = "5.7.25"
+db_name = "ranger"
+
+#Database root user
+db_user = "root"
+db_pwd = "password"
+db_ranger_user = "rangeradmin"
+db_ranger_pwd = "******"
+ 
+#any db subnet group name
+db_subnet_group_name = "ranger-db-subnet"
+db_allocated_storage = 20
+db_instance_type = "db.t2.medium"
+
+
+rds_port = 3306
