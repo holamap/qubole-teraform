@@ -1,25 +1,28 @@
+#------MySQL Ranger RDS---------
+#Create DB subnet groups
+resource "aws_db_subnet_group" "rds_db_subnet_grp" {
+  name       = "${var.db_subnet_group_name}"
+  subnet_ids = "${var.private_subnets}"
+ 
+  tags = {
+    Name = "${var.db_subnet_group_name}"
+  }
+}
 #Configure security group for RDS
 resource "aws_security_group" "rds_sg" {
   name        = "${var.rds_sg_name}"
-  description = "RDS Secuirty Group"
+  description = "${var.rds_sg_desc}"
   vpc_id      = "${var.vpc_id}"
-
-  # Allow mysql traffic
+ 
+  #Allow mysql traffic
   ingress {
-    from_port       = 3306
-    to_port         = 3306
+    from_port       = "${var.rds_port}"
+    to_port         = "${var.rds_port}"
     protocol        = "tcp"
-    cidr_blocks = ["${var.vpc_ip}"]
+    cidr_blocks = ["${data.aws_vpc.selected.cidr_block}"]
   }
-
-  ingress {
-    from_port       = 3306
-    to_port         = 3306
-    protocol        = "tcp"
-    cidr_blocks = ["${var.my_ip}"]
-  }
-  
-  # Allow all outbound traffic.
+   
+  #Allow all outbound traffic.
   egress {
     from_port   = 0
     to_port     = 0
@@ -30,20 +33,31 @@ resource "aws_security_group" "rds_sg" {
     Name = "${var.rds_sg_name}"
   }
 }
-
+ 
 #Configure MYSQL RDS instance
 resource "aws_db_instance" "ranger_mysql" {
-  identifier                = "${var.rds_instance_identifier}"
-  engine                    = "mysql"
-  engine_version            = "${var.engine_version}"
-  instance_class            = "db.t2.micro"
-  allocated_storage         = 20
-  name                      = "${var.database_name}"
-  username                  = "${var.database_user}"
-  password                  = "${var.database_pwd}"
+  identifier                = "${var.db_instance_identifier}"
+  engine                    = "${var.db_engine}"
+  engine_version            = "${var.db_engine_version}"
+  instance_class            = "${var.db_instance_type}"
+  allocated_storage         = "${var.db_allocated_storage}"
+  name                      = "${var.db_name}"
+  username                  = "${var.db_user}"
+  password                  = "${var.db_pwd}"
   db_subnet_group_name      = "${var.db_subnet_group_name}"
   vpc_security_group_ids    = ["${aws_security_group.rds_sg.id}"]
-  availability_zone         = "${var.db_availability_zone}"
   skip_final_snapshot       = true
   final_snapshot_identifier = "Ignore"
+  publicly_accessible       = false
+}
+provider "mysql" {
+  endpoint = "${aws_db_instance.ranger_mysql.endpoint}"
+  username = "${aws_db_instance.ranger_mysql.username}"
+  password = "${aws_db_instance.ranger_mysql.password}"
+}
+
+
+#Declare the data source
+data "aws_vpc" "selected" {
+  id = "${var.vpc_id}"
 }
